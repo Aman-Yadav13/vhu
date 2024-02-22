@@ -1,10 +1,10 @@
 import { currentUser } from "./current-user";
 import { db } from "./db";
 
-export const currentPatientDetails = async () => {
+export const currentPatientDoctorIdExists = async () => {
   const currentuser = await currentUser();
   if (!currentuser) {
-    return null;
+    return false;
   }
 
   const currentUserId = currentuser.userId;
@@ -14,8 +14,13 @@ export const currentPatientDetails = async () => {
     },
   });
   if (!currentPatient) {
-    return null;
+    return false;
+  }
+  const doctorId = currentPatient.doctorId;
+
+  if (doctorId.length == 0) {
+    return false;
   }
 
-  return currentPatient;
+  return true;
 };

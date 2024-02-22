@@ -1,13 +1,16 @@
+import CheckoutButton from "@/components/stripe/checkout-button";
 import { Button } from "@/components/ui/button";
 import { Doctor } from "@prisma/client";
 import Image from "next/image";
 
 interface DoctorListItemProps {
   doctor: Doctor;
+  userId: string | undefined;
 }
 
-export const DoctorsListItem = ({ doctor }: DoctorListItemProps) => {
+export const DoctorsListItem = ({ doctor, userId }: DoctorListItemProps) => {
   console.log(doctor);
+
   return (
     <>
       <div className="flex items-center">
@@ -34,7 +37,7 @@ export const DoctorsListItem = ({ doctor }: DoctorListItemProps) => {
           </Button>
         </div>
       </div>
-      <Button className="absolute right-2 bottom-2">Proceed to payment</Button>
+      <CheckoutButton doctorData={{ ...doctor }} userId={userId} />
     </>
   );
 };

@@ -7,9 +7,10 @@ import { useEffect, useState } from "react";
 
 interface DoctorListProps {
   doctors: Doctor[];
+  userId: string | undefined;
 }
 
-export const DoctorsList = ({ doctors }: DoctorListProps) => {
+export const DoctorsList = ({ doctors, userId }: DoctorListProps) => {
   const [mounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -24,7 +25,7 @@ export const DoctorsList = ({ doctors }: DoctorListProps) => {
     <ScrollArea className="w-full h-full">
       {doctors.map((doctor) => (
         <div className="bg-[#f3f4f5] rounded-md w-full px-2 py-2 relative">
-          <DoctorsListItem doctor={doctor} />
+          <DoctorsListItem doctor={doctor} userId={userId} />
         </div>
       ))}
     </ScrollArea>
