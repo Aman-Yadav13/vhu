@@ -1,0 +1,127 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  relationMode = "prisma"
+  url          = env("DATABASE_URL")
+}
+
+model User {
+  id       String  @id @default(uuid())
+  userId   String  @unique
+  name     String
+  imageUrl String  @db.Text
+  email    String  @db.Text
+  doctor   Doctor?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum MedicalDegree {
+  MBBS
+  MD
+  DO
+  DMD
+  DDS
+  PharmD
+  DVM
+  PhD
+}
+
+enum Specialization {
+  Cardiology
+  Dermatology
+  Pediatrics
+  Neurology
+  Orthopedics
+  Gynecology
+  Psychiatry
+  Oncology
+  Radiology
+  Ophthalmology
+  Urology
+  Endocrinology
+  Gastroenterology
+  Pulmonology
+  Hematology
+}
+
+enum GenderType {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum MedicalSymptoms {
+  Cold
+  Cough
+  Fever
+  Headache
+  StomachAche
+  SoreThroat
+  Allergies
+  Flu
+  BackPain
+  JointPain
+  SkinRash
+  HighBloodPressure
+  Diabetes
+  Asthma
+  Anxiety
+  Depression
+  Insomnia
+  Fatigue
+  DigestiveIssues
+  UrinaryTractInfection
+}
+
+model Doctor {
+  id             String         @id @default(uuid())
+  name           String
+  userId         String         @unique
+  email          String         @unique
+  degree         MedicalDegree  @default(MBBS)
+  specialization Specialization @default(Cardiology)
+  license        String         @unique
+  address        String         @db.Text
+  contact        String
+  experience     String         @default("")
+  biography      String         @db.Text
+  imageUrl       String         @db.Text
+
+  customers Patient[]
+
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Patient {
+  id              String          @id @default(uuid())
+  name            String
+  fathername      String
+  gender          GenderType
+  doctorId        String          @unique @default("")
+  address         String          @db.Text
+  medicalsymptoms MedicalSymptoms
+  medicalreport   String          @db.Text
+
+  doctor Doctor @relation(fields: [doctorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([doctorId])
+}
