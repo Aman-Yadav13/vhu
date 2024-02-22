@@ -8,7 +8,6 @@ const UpcomingAppointmentsPage = async () => {
 
   if (!isPatient) {
     redirect("/");
-    window.alert("You must fill a patient form to access this section");
   }
 
   if (!isDoctorAffiliated) {

@@ -9,35 +9,33 @@ interface DoctorListItemProps {
 }
 
 export const DoctorsListItem = ({ doctor, userId }: DoctorListItemProps) => {
-  console.log(doctor);
-
   return (
     <>
       <div className="flex items-center">
         <Image
           src={doctor.imageUrl}
           alt={doctor.name}
-          width={150}
-          height={150}
+          width={200}
+          height={200}
+          className="aspect-square rounded"
         />
         <div className="flex flex-col ml-8 self-start">
           <p className="text-2xl font-semibold">{doctor.name}</p>
-          <p className="text-lg">
+          <p className="text-md">
             Degree: <span>{doctor.degree}</span>
           </p>
-          <p className="text-lg">
+          <p className="text-md">
             Specialization in: <span>{doctor.specialization}</span>
           </p>
-          <Button
-            className="text-white w-fit bg-cyan-400 hover:bg-cyan-300"
-            variant="outline"
-            size="default"
-          >
-            Reviews
-          </Button>
+          <p className="text-md">Experience: {doctor.experience} years</p>
         </div>
       </div>
-      <CheckoutButton doctorData={{ ...doctor }} userId={userId} />
+      <div className="absolute right-2 bottom-2 flex items-center gap-x-2">
+        <Button className="" variant="default" size="lg">
+          <p className="text-lg">Reviews</p>
+        </Button>
+        <CheckoutButton doctorData={{ ...doctor }} userId={userId} />
+      </div>
     </>
   );
 };

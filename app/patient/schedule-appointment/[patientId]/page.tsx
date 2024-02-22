@@ -9,9 +9,7 @@ const ScheduleAppointmentPage = async () => {
 
   return (
     <div className="h-full w-full px-8 py-2">
-      <p className="font-semibold text-3xl text-zinc-800">
-        <DoctorsList doctors={doctors} userId={userId} />
-      </p>
+      <DoctorsList doctors={doctors} userId={userId} />
     </div>
   );
 };

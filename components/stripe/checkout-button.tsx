@@ -39,11 +39,8 @@ export default function CheckoutButton({
   };
 
   return (
-    <Button
-      onClick={redirectToCheckout}
-      className="rounded-md border border-transparent bg-sky-900 px-6 py-3 text-base font-medium text-white shadow-sm hover:bg-sky-700 mr-2 disabled:bg-gray-600"
-    >
-      Checkout
+    <Button size="lg" onClick={redirectToCheckout} variant="primary">
+      <p className="text-lg">Checkout</p>
     </Button>
   );
 }

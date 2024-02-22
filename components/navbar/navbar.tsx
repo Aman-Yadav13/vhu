@@ -8,8 +8,6 @@ export const Navbar = async () => {
   const user = await initialProfile();
   const isPatient = await currentPatientExists();
 
-  console.log(isPatient);
-
   return (
     <div className="flex items-center justify-between z-20">
       <NavbarHeader />
