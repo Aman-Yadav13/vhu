@@ -1,6 +1,7 @@
 import { currentUser } from "@/lib/current-user";
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { NEVER } from "zod";
 
 export async function POST(
   req: Request,
@@ -51,6 +52,16 @@ export async function POST(
 
     if (currentuser.email !== email) {
       return new NextResponse("Emails mismatch", { status: 401 });
+    }
+
+    const existingDoctor = await db.doctor.findUnique({
+      where: {
+        userId: userId,
+      },
+    });
+
+    if (existingDoctor) {
+      return NextResponse.json(existingDoctor);
     }
 
     const doctor = await db.doctor.create({

@@ -14,18 +14,6 @@ datasource db {
   url          = env("DATABASE_URL")
 }
 
-model User {
-  id       String  @id @default(uuid())
-  userId   String  @unique
-  name     String
-  imageUrl String  @db.Text
-  email    String  @db.Text
-  doctor   Doctor?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 enum MedicalDegree {
   MBBS
   MD
@@ -84,6 +72,19 @@ enum MedicalSymptoms {
   UrinaryTractInfection
 }
 
+model User {
+  id       String   @id @default(uuid())
+  userId   String   @unique
+  name     String
+  imageUrl String   @db.Text
+  email    String   @db.Text
+  doctor   Doctor?
+  patient  Patient?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Doctor {
   id             String         @id @default(uuid())
   name           String
@@ -98,9 +99,11 @@ model Doctor {
   biography      String         @db.Text
   imageUrl       String         @db.Text
 
-  customers Patient[]
+  patients Patient[]
 
-  user User @relation(fields: [userId], references: [id])
+  reviews Review[]
+
+  user User? @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -108,20 +111,38 @@ model Doctor {
   @@index([userId])
 }
 
-model Patient {
-  id              String          @id @default(uuid())
-  name            String
-  fathername      String
-  gender          GenderType
-  doctorId        String          @unique @default("")
-  address         String          @db.Text
-  medicalsymptoms MedicalSymptoms
-  medicalreport   String          @db.Text
+model Review {
+  id       String @id @default(uuid())
+  rating   Int?
+  comment  String
+  doctorId String
 
+  // Define the many-to-one relationship with Doctor model
   doctor Doctor @relation(fields: [doctorId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([doctorId])
+}
+
+model Patient {
+  id              String          @id @default(uuid())
+  name            String
+  fathername      String
+  gender          GenderType
+  userId          String          @unique
+  doctorId        String
+  address         String          @db.Text
+  medicalsymptoms MedicalSymptoms
+  medicalreport   String          @db.Text
+
+  user   User?   @relation(fields: [userId], references: [id])
+  doctor Doctor? @relation(fields: [doctorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
   @@index([doctorId])
 }

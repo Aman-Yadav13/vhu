@@ -26,37 +26,29 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { useParams, useRouter } from "next/navigation";
-import { MedicalDegree, Specialization } from "@prisma/client";
+import { GenderType, MedicalSymptoms } from "@prisma/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import Link from "next/link";
 import { CreateDoctorSignInModal } from "@/components/modals/doctor-sign-in-modal";
-import { useModal } from "@/hooks/use-modal";
+import { Separator } from "@/components/ui/separator";
 
 const formSchema = z.object({
   name: z.string().min(1, {
-    message: "Doctor name is required.",
+    message: "Name is required.",
   }),
-  email: z.string().nonempty(),
+  fathername: z.string().nonempty(),
+  gender: z.nativeEnum(GenderType),
+  medicalreport: z.string().min(1, {
+    message: "Submit your latest medical report",
+  }),
+  medicalsymptoms: z.nativeEnum(MedicalSymptoms),
+  address: z.string(),
   userId: z.string(),
-  degree: z.nativeEnum(MedicalDegree),
-  specialization: z.nativeEnum(Specialization),
-  license: z.string().nonempty(),
-  address: z.string().nonempty(),
-  contact: z.string().nonempty(),
-  experience: z.string().min(1).nonempty(),
-  biography: z.string().min(50),
-  imageUrl: z
-    .string()
-    .min(1, {
-      message: "Doctor Image is required",
-    })
-    .nonempty(),
+  doctorId: z.string(),
 });
 
-const RegisterDoctor = () => {
-  const { onOpen } = useModal();
+const RegisterPatient = () => {
   const router = useRouter();
   const params = useParams();
 
@@ -64,16 +56,13 @@ const RegisterDoctor = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      userId: params?.doctorId as string,
-      email: "",
-      degree: MedicalDegree.MBBS,
-      specialization: Specialization.Cardiology,
-      license: "",
+      gender: GenderType.OTHER,
+      fathername: "",
       address: "",
-      contact: "",
-      experience: "1",
-      biography: "",
-      imageUrl: "",
+      medicalsymptoms: MedicalSymptoms.Cold,
+      medicalreport: "",
+      userId: params?.customerId as string,
+      doctorId: "",
     },
   });
 
@@ -81,8 +70,11 @@ const RegisterDoctor = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.post(`/api/doctors/${params?.doctorId}/registration`, values);
-      console.log(values);
+      await axios
+        .post(`/api/customers/${params?.customerId}/registration`, values)
+        .then((patient) => {
+          router.push(`/patient/schedule-appointment/${patient?.data?.userId}`);
+        });
       form.reset();
       router.refresh();
     } catch (error) {
@@ -94,33 +86,16 @@ const RegisterDoctor = () => {
     <>
       <div className="mt-4">
         <div className="bg-[#fcfcfc] rounded-md max-w-[620px]">
-          <div className="text-indigo-500 text-3xl font-semibold text-center mt-2">
-            Are you a doctor?
+          <div className="text-black text-3xl font-semibold text-center mt-2">
+            Patient Form
           </div>
           <p className="text-indigo-400 text-center text-md">
-            Fill the form and become an integral part of VHC
+            Find and choose the best doctors for your medical condition, you are
+            just one form away
           </p>
           <ScrollArea className="space-y-12 px-6 pb-16 h-[600px] max-w-[600px]">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
-                <FormField
-                  control={form.control}
-                  name="imageUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="w-[550px] flex items-center justify-center">
-                        <FormControl>
-                          <FileUpload
-                            endpoint="doctorImage"
-                            value={field.value}
-                            onChange={field.onChange}
-                          />
-                        </FormControl>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-
                 <FormField
                   control={form.control}
                   name="name"
@@ -143,17 +118,17 @@ const RegisterDoctor = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="fathername"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                        Email
+                        Father name
                       </FormLabel>
                       <FormControl>
                         <Input
                           disabled={isLoading}
                           className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                          placeholder="Enter email"
+                          placeholder="Enter your father's name"
                           {...field}
                         />
                       </FormControl>
@@ -163,10 +138,10 @@ const RegisterDoctor = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="degree"
+                  name="gender"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Degree</FormLabel>
+                      <FormLabel>Gender</FormLabel>
                       <Select
                         disabled={isLoading}
                         onValueChange={field.onChange}
@@ -174,11 +149,11 @@ const RegisterDoctor = () => {
                       >
                         <FormControl>
                           <SelectTrigger className="bg-zinc-300/50 border-0 focus:ring-0 text-black ring-offset-0 focus:ring-offset-0 capitalize outline-none">
-                            <SelectValue placeholder="Select your degree" />
+                            <SelectValue placeholder="Select your gender" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {Object.values(MedicalDegree).map((type) => (
+                          {Object.values(GenderType).map((type) => (
                             <SelectItem
                               key={type}
                               value={type}
@@ -195,10 +170,10 @@ const RegisterDoctor = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="specialization"
+                  name="medicalsymptoms"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Specialization</FormLabel>
+                      <FormLabel>Medical Symptoms</FormLabel>
                       <Select
                         disabled={isLoading}
                         onValueChange={field.onChange}
@@ -206,11 +181,11 @@ const RegisterDoctor = () => {
                       >
                         <FormControl>
                           <SelectTrigger className="bg-zinc-300/50 border-0 focus:ring-0 text-black ring-offset-0 focus:ring-offset-0 capitalize outline-none">
-                            <SelectValue placeholder="Select your degree" />
+                            <SelectValue placeholder="Select the biggest symptom you are feeling" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {Object.values(Specialization).map((type) => (
+                          {Object.values(MedicalSymptoms).map((type) => (
                             <SelectItem
                               key={type}
                               value={type}
@@ -225,99 +200,20 @@ const RegisterDoctor = () => {
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="license"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                        License
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          disabled={isLoading}
-                          className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                          placeholder="Enter your medical license"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="contact"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                        Contact Number
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          disabled={isLoading}
-                          className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                          placeholder="Enter your phone number"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
                 <FormField
                   control={form.control}
                   name="address"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                        Address
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          disabled={isLoading}
-                          className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                          placeholder="Enter your address"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="experience"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                        Experience
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          disabled={isLoading}
-                          className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                          placeholder="Experience(in years)"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="biography"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
-                        Biography
+                        Residential address
                       </FormLabel>
                       <FormControl>
                         <Textarea
                           disabled={isLoading}
                           className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
-                          placeholder="Write about yourself"
+                          placeholder="Enter your complete address"
                           {...field}
                         />
                       </FormControl>
@@ -325,16 +221,29 @@ const RegisterDoctor = () => {
                     </FormItem>
                   )}
                 />
-                <div className="flex items-center justify-between mt-4">
+                <div className="mt-4">
+                  <FormField
+                    control={form.control}
+                    name="medicalreport"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="w-[550px] flex items-center justify-center">
+                          <FormControl>
+                            <FileUpload
+                              endpoint="medicalReport"
+                              value={field.value}
+                              onChange={field.onChange}
+                            />
+                          </FormControl>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <Separator className="h-[2px] w-full mt-4" />
+                <div className="flex items-center  mt-4">
                   <Button variant="primary" disabled={isLoading}>
                     Submit
-                  </Button>
-                  <Button
-                    variant="link"
-                    asChild
-                    onClick={() => onOpen("doctorSignIn")}
-                  >
-                    <p>Already enrolled?</p>
                   </Button>
                 </div>
               </form>
@@ -347,4 +256,4 @@ const RegisterDoctor = () => {
   );
 };
 
-export default RegisterDoctor;
+export default RegisterPatient;
